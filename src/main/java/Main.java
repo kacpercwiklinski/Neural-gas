@@ -1,22 +1,31 @@
 import processing.core.PApplet;
+import processing.core.PVector;
+
+import java.util.List;
 
 public class Main extends PApplet {
 
     // BASIC SETTINGS
-    private static final int HEIGHT = 800;
-    private static final int WIDTH = 800;
-    private static final int BACKGROUND_COLOR = 51;
+    public static final int HEIGHT = 800;
+    public static final int WIDTH = 800;
+    public static final int BACKGROUND_COLOR = 51;
 
-    public static void main(String[] args) {
-        PApplet.main("Main");
-    }
+    Data data;
 
     public void settings() {
         size(WIDTH, HEIGHT);
+        data = new Data(this);
+        data.initializeData();
     }
 
     public void draw() {
         background(BACKGROUND_COLOR);
+
+        this.data.draw();
+    }
+
+    public static void main(String[] args) {
+        PApplet.main("Main");
     }
 }
 

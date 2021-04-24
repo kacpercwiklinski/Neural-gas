@@ -1,10 +1,8 @@
 import de.milchreis.uibooster.UiBooster;
-import de.milchreis.uibooster.model.Form;
 import processing.core.PApplet;
 import processing.core.PVector;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class Main extends PApplet {
@@ -15,12 +13,12 @@ public class Main extends PApplet {
     public static final int BACKGROUND_COLOR = 51;
 
     // Gas settings
-    public static float LAMBDA = 30;
-    public static float E_B = 0.2f;
-    public static float E_N = 0.006f;
-    public static float ALFA = 0.5f;
-    public static float D = 0.995f;
-    public static int A_MAX = 30;
+    public static final float LAMBDA = 50;
+    public static final float E_B = 0.2f;
+    public static final float E_N = 0.006f;
+    public static final float ALFA = 0.5f;
+    public static final float D = 0.995f;
+    public static final int A_MAX = 50;
 
     List<PVector> dataNodes;
     NeuralGas neuralGas;

@@ -1,9 +1,10 @@
 import de.milchreis.uibooster.UiBooster;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 
 public class ContextMenu {
-    UiBooster uiBooster = new UiBooster();
+    @NotNull UiBooster uiBooster = new UiBooster();
     String textValue;
     public void showMenu() {
         System.out.println("as");

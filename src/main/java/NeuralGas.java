@@ -1,15 +1,18 @@
+import org.jetbrains.annotations.NotNull;
 import processing.core.PApplet;
 import processing.core.PVector;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class NeuralGas {
-    PApplet pApplet;
+    final PApplet pApplet;
     List<Node> referenceVectors;
     List<Edge> edges;
     List<PVector> dataNodes;
-    Random random;
     int inputSignals;
 
     public NeuralGas(PApplet pApplet, List<PVector> dataNodes) {
@@ -18,7 +21,6 @@ public class NeuralGas {
         this.inputSignals = 1;
         this.referenceVectors = new ArrayList<>();
         this.edges = new ArrayList<>();
-        this.random = new Random();
     }
 
     public void initializeNeuralGas() {
@@ -30,12 +32,12 @@ public class NeuralGas {
         referenceVectors.add(b);
     }
 
-    public void adapt(PVector dataVector) {
+    public void adapt(@NotNull PVector dataVector) {
 
         Node s1 = this.referenceVectors.stream().min((v1, v2) -> v1.dist(dataVector) >= v2.dist(dataVector) ? 1 : -1).get();
         Node s2 = this.referenceVectors.stream().filter(v -> !v.equals(s1)).min((v1, v2) -> v1.dist(dataVector) >= v2.dist(dataVector) ? 1 : -1).get();
 
-        getNodeEdges(s1).stream().forEach(Edge::increaseAge);
+        getNodeEdges(s1).forEach(Edge::increaseAge);
 
         float distance = s1.dist(dataVector);
         s1.increaseError((float) Math.pow(distance, 2));
@@ -93,13 +95,13 @@ public class NeuralGas {
     }
 
     public void drawGas() {
-        this.referenceVectors.forEach(pVector -> {
+        this.referenceVectors.forEach(node -> {
             this.pApplet.strokeWeight(5f);
             this.pApplet.stroke(255, 0, 0);
-            this.pApplet.point(pVector.x, pVector.y);
+            this.pApplet.point(node.x, node.y);
         });
 
-        edges.forEach(edge -> {
+        this.edges.forEach(edge -> {
             this.pApplet.strokeWeight(1f);
             this.pApplet.line(edge.pointA.x, edge.pointA.y, edge.pointB.x, edge.pointB.y);
         });
@@ -109,7 +111,7 @@ public class NeuralGas {
         return this.edges.stream().filter(edge -> edge.getPointA() == node || edge.getPointB() == node).collect(Collectors.toList());
     }
 
-    public Optional<Edge> getNodesEdge(Node n1, Node n2) {
+    public @NotNull Optional<Edge> getNodesEdge(Node n1, Node n2) {
         return this.edges.stream().filter(edge -> (edge.pointA == n1 && edge.pointB == n2) || edge.pointA == n2 && edge.pointB == n1).findFirst();
     }
 

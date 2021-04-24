@@ -1,24 +1,14 @@
 import processing.core.PVector;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Edge {
 
-    Node pointA;
-    Node pointB;
+    final Node pointA;
+    final Node pointB;
     float age;
 
     public Edge(Node pointA, Node pointB) {
         this.pointA = pointA;
         this.pointB = pointB;
-    }
-
-    public List<Node> getPoints() {
-        List<Node> points = new ArrayList<Node>();
-        points.add(this.pointA);
-        points.add(this.pointB);
-        return points;
     }
 
     public Node getOther(Node node) {

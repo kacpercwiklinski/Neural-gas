@@ -15,12 +15,12 @@ public class Main extends PApplet {
     public static final int BACKGROUND_COLOR = 51;
 
     // Gas settings
-    public static float LAMBDA = 100;
+    public static float LAMBDA = 30;
     public static float E_B = 0.2f;
     public static float E_N = 0.006f;
     public static float ALFA = 0.5f;
     public static float D = 0.995f;
-    public static int A_MAX = 50;
+    public static int A_MAX = 30;
 
     List<PVector> dataNodes;
     NeuralGas neuralGas;
@@ -39,13 +39,12 @@ public class Main extends PApplet {
 
     public void draw() {
         background(BACKGROUND_COLOR);
-
         this.neuralGas.updateGas();
-        this.neuralGas.drawGas();
 
+        this.neuralGas.drawGas();
         this.dataNodes.forEach(node -> {
-            stroke(255, 255, 255, 100f);
-            strokeWeight(5f);
+            stroke(255, 255, 255, 51f);
+            strokeWeight(3f);
             point(node.x, node.y);
         });
 

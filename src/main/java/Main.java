@@ -3,6 +3,7 @@ import de.milchreis.uibooster.model.Form;
 import processing.core.PApplet;
 import processing.core.PVector;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -13,42 +14,59 @@ public class Main extends PApplet {
     public static final int WIDTH = 800;
     public static final int BACKGROUND_COLOR = 51;
 
-    Data data;
+    // Gas settings
+    public static float LAMBDA = 300;
+    public static float E_B = 0.05f;
+    public static float E_N = 0.0006f;
+    public static float ALFA = 0.5f;
+    public static float BETA = 0.0005f;
+    public static int A_MAX = 50;
+
+    List<Node> dataNodes;
     NeuralGas neuralGas;
     UiBooster uiBooster;
 
     public void settings() {
         size(WIDTH, HEIGHT);
         uiBooster = new UiBooster();
+        dataNodes= new ArrayList<>();
 
-        data = new Data(this);
-        data.initializeData();
-
-        neuralGas = new NeuralGas(this);
+        neuralGas = new NeuralGas(this, this.dataNodes);
         neuralGas.initializeNeuralGas();
+
+        initializeData();
     }
 
     public void draw() {
         background(BACKGROUND_COLOR);
-        this.data.draw();
+
+        dataNodes.forEach(node -> {
+            stroke(255,255,255);
+            strokeWeight(10f);
+            point(node.getVector().x,node.getVector().y);
+        });
+
         this.neuralGas.drawGas();
+        this.neuralGas.updateGas();
 
         handleMouse();
     }
 
+    public void initializeData(){
+        dataNodes = new ArrayList<>();
+        Node a = new Node(new PVector(Main.WIDTH / 4, Main.HEIGHT / 4), this.neuralGas.getEdges());
+        Node b = new Node(new PVector(Main.WIDTH / 4 * 3, Main.HEIGHT / 4), this.neuralGas.getEdges());
+        Node c = new Node(new PVector(Main.WIDTH / 4 * 3, Main.HEIGHT / 4 * 3), this.neuralGas.getEdges());
+        Node d = new Node(new PVector(Main.WIDTH / 4, Main.HEIGHT / 4 * 3), this.neuralGas.getEdges());
+        dataNodes.add(a);
+        dataNodes.add(b);
+        dataNodes.add(c);
+        dataNodes.add(d);
+    }
+
     public void handleMouse(){
         if(mousePressed && mouseButton == RIGHT){
-            Form form = uiBooster.createForm("Personal information")
-                    .addText("Whats your first name?")
-                    .addTextArea("Tell me something about you")
-                    .addSelection(
-                            "Whats your favorite movie?",
-                            Arrays.asList("Pulp Fiction", "Bambi", "The Godfather", "Hangover"))
-                    .addLabel("Choose an action")
-                    .addButton("half full", () -> uiBooster.showInfoDialog("Optimist"))
-                    .addButton("half empty", () -> uiBooster.showInfoDialog("Pessimist"))
-                    .addSlider("How many liters did you drink today?", 0, 5, 1, 5, 1)
-                    .show();
+
         }
     }
 

@@ -13,7 +13,7 @@ public class Main extends PApplet {
     public static final int BACKGROUND_COLOR = 51;
 
     // Gas settings
-    public static final float LAMBDA = 50;
+    public static final float LAMBDA = 300;
     public static final float E_B = 0.2f;
     public static final float E_N = 0.006f;
     public static final float ALFA = 0.5f;
@@ -51,10 +51,10 @@ public class Main extends PApplet {
 
     public void initializeData(){
         dataNodes = new ArrayList<>();
-        PVector a = new PVector(Main.WIDTH / 4, Main.HEIGHT / 4);
-        PVector b = new PVector(Main.WIDTH / 4 * 3, Main.HEIGHT / 4);
-        PVector c = new PVector(Main.WIDTH / 4 * 3, Main.HEIGHT / 4 * 3);
-        PVector d = new PVector(Main.WIDTH / 4, Main.HEIGHT / 4 * 3);
+        PVector a = new PVector((float)Main.WIDTH / 4, (float)Main.HEIGHT / 4);
+        PVector b = new PVector((float)Main.WIDTH / 4 * 3, (float)Main.HEIGHT / 4);
+        PVector c = new PVector((float)Main.WIDTH / 4 * 3, (float)Main.HEIGHT / 4 * 3);
+        PVector d = new PVector((float)Main.WIDTH / 4, (float)Main.HEIGHT / 4 * 3);
         dataNodes.add(a);
         dataNodes.add(b);
         dataNodes.add(c);

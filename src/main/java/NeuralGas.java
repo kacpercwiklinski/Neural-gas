@@ -2,14 +2,12 @@ import org.jetbrains.annotations.NotNull;
 import processing.core.PApplet;
 import processing.core.PVector;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class NeuralGas {
     final PApplet pApplet;
+    private final Random random;
     List<Node> referenceVectors;
     List<Edge> edges;
     List<PVector> dataNodes;
@@ -17,6 +15,7 @@ public class NeuralGas {
 
     public NeuralGas(PApplet pApplet, List<PVector> dataNodes) {
         this.pApplet = pApplet;
+        this.random = new Random();
         this.dataNodes = dataNodes;
         this.inputSignals = 1;
         this.referenceVectors = new ArrayList<>();
@@ -67,7 +66,7 @@ public class NeuralGas {
     }
 
     public void updateGas() {
-        this.dataNodes.forEach(this::adapt);
+        this.adapt(this.dataNodes.get(random.nextInt(this.dataNodes.size())));
 
         if (this.inputSignals % Main.LAMBDA == 0) {
             Node q = this.referenceVectors.stream().max(Comparator.comparing(Node::getError)).get();

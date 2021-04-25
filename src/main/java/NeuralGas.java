@@ -10,13 +10,11 @@ public class NeuralGas {
     private final Random random;
     List<Node> referenceVectors;
     List<Edge> edges;
-    List<PVector> dataNodes;
     int inputSignals;
 
-    public NeuralGas(PApplet pApplet, List<PVector> dataNodes) {
+    public NeuralGas(PApplet pApplet) {
         this.pApplet = pApplet;
         this.random = new Random();
-        this.dataNodes = dataNodes;
         this.inputSignals = 1;
         this.referenceVectors = new ArrayList<>();
         this.edges = new ArrayList<>();
@@ -65,9 +63,17 @@ public class NeuralGas {
         this.referenceVectors = this.referenceVectors.stream().filter(n -> getNodeEdges(n).size() > 0).collect(Collectors.toList());
     }
 
-    public void updateGas() {
-        this.adapt(this.dataNodes.get(random.nextInt(this.dataNodes.size())));
+    public void nextIteration(List<PVector> input){
+        this.adapt(input.get(random.nextInt(input.size())));
+        this.newNodeCheck();
 
+        // Decrease all nodes error
+        this.referenceVectors.forEach(n -> n.decreaseError(n.getError() * Main.D));
+
+        this.inputSignals++;
+    }
+
+    public void newNodeCheck() {
         if (this.inputSignals % Main.LAMBDA == 0) {
             Node q = this.referenceVectors.stream().max(Comparator.comparing(Node::getError)).get();
             Node f = this.getNeighbours(q).stream().max(Comparator.comparing(Node::getError)).get();
@@ -86,11 +92,6 @@ public class NeuralGas {
             this.edges.add(f_r);
             this.referenceVectors.add(r);
         }
-
-        // Decrease all nodes error
-        this.referenceVectors.forEach(n -> n.decreaseError(n.getError() * Main.D));
-
-        this.inputSignals++;
     }
 
     public void drawGas() {
@@ -117,10 +118,6 @@ public class NeuralGas {
     public List<Node> getNeighbours(Node node) {
         List<Edge> nodeEdges = getNodeEdges(node);
         return nodeEdges.stream().map(n -> n.getOther(node)).collect(Collectors.toList());
-    }
-
-    public void setDataNodes(List<PVector> dataNodes) {
-        this.dataNodes = dataNodes;
     }
 }
 

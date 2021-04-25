@@ -31,13 +31,13 @@ public class Main extends PApplet {
 
         initializeData();
 
-        neuralGas = new NeuralGas(this, this.dataNodes);
+        neuralGas = new NeuralGas(this);
         neuralGas.initializeNeuralGas();
     }
 
     public void draw() {
         background(BACKGROUND_COLOR);
-        this.neuralGas.updateGas();
+        this.neuralGas.nextIteration(this.dataNodes);
 
         this.neuralGas.drawGas();
         this.dataNodes.forEach(node -> {
@@ -64,7 +64,6 @@ public class Main extends PApplet {
     public void handleMouse(){
         if(mousePressed && mouseButton == LEFT){
             this.dataNodes.add(new PVector(mouseX,mouseY));
-            this.neuralGas.setDataNodes(this.dataNodes);
         }
     }
 

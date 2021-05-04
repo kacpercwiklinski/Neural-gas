@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Main extends PApplet {
-    ContextMenu menu;
+    static ContextMenu menu;
 
     // BASIC SETTINGS
     public static final int HEIGHT = 800;
@@ -16,12 +16,8 @@ public class Main extends PApplet {
     public static final int BACKGROUND_COLOR = 51;
 
     // Gas settings
-    public static float LAMBDA = 300;
-    public static float E_B = 0.05f;
-    public static float E_N = 0.0006f;
     public static float ALFA = 0.5f;
     public static float BETA = 0.0005f;
-    public static int A_MAX = 50;
 
     List<Node> dataNodes;
     NeuralGas neuralGas;
@@ -30,7 +26,6 @@ public class Main extends PApplet {
 
     public void settings() {
         size(WIDTH, HEIGHT);
-        uiBooster = new UiBooster();
         dataNodes = new ArrayList<>();
 
         menu = new ContextMenu();
@@ -38,6 +33,10 @@ public class Main extends PApplet {
         neuralGas = new NeuralGas(this, this.dataNodes);
         neuralGas.initializeNeuralGas();
 
+        menu.showMenu();
+        if (menu.SUBMITTED == Boolean.FALSE){
+            System.exit(0);
+        }
         initializeData();
     }
 
@@ -50,8 +49,10 @@ public class Main extends PApplet {
             point(node.getVector().x,node.getVector().y);
         });
 
+        ////Test
+//        System.out.println(menu.LAMBDA);
+        ///Test end
         this.neuralGas.drawGas();
-
         this.neuralGas.updateGas();
 
         handleMouse();

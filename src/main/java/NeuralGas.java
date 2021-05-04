@@ -44,8 +44,8 @@ public class NeuralGas {
 
     public void updateNeighbours(){
         for (Node inVec : this.dataNodes){
-            inVec.getS1().set(new PVector(inVec.getVector().x,inVec.getVector().y).sub(inVec.getS1().x,inVec.getS1().y).mult(Main.E_B));
-            inVec.getS1Neighbours().forEach(neighbour -> neighbour.set(new PVector(inVec.getVector().x,inVec.getVector().y).sub(neighbour.x,neighbour.y).mult(Main.E_N)));
+            inVec.getS1().set(new PVector(inVec.getVector().x,inVec.getVector().y).sub(inVec.getS1().x,inVec.getS1().y).mult(Main.menu.E_B));
+            inVec.getS1Neighbours().forEach(neighbour -> neighbour.set(new PVector(inVec.getVector().x,inVec.getVector().y).sub(neighbour.x,neighbour.y).mult(Main.menu.E_N)));
         }
     }
 
@@ -60,7 +60,7 @@ public class NeuralGas {
             }
 
             this.edges.stream().forEach(edge -> {
-                if (edge.getAge() > Main.A_MAX){
+                if (edge.getAge() > Main.menu.A_MAX){
                     this.edges.remove(edge);
                 }
             });

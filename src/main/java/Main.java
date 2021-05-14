@@ -70,8 +70,13 @@ public class Main extends PApplet {
             System.out.println(fileName);
         }
         menu.showMenu();
+    }
+
+    public void setup() {
         if (menu.SUBMITTED == Boolean.FALSE){
             System.exit(0);
+        }else{
+            initialize();
         }
     }
 
@@ -85,11 +90,6 @@ public class Main extends PApplet {
     }
 
     public void draw() {
-        if (menu.SUBMITTED == Boolean.TRUE){
-            initialize();
-            menu.SUBMITTED = Boolean.FALSE;
-        }
-
         if (DRAW_IMAGE)
             image(inputImage, 0, 0);
         else
@@ -133,6 +133,10 @@ public class Main extends PApplet {
     public void handleMouse(){
         if(mousePressed && mouseButton == RIGHT) {
             menu.showMenu();
+            if (menu.SUBMITTED == Boolean.TRUE){
+                initialize();
+                menu.SUBMITTED = Boolean.FALSE;
+            }
         }
     }
 

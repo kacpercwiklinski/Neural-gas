@@ -1,102 +1,122 @@
+import org.jetbrains.annotations.NotNull;
 import processing.core.PApplet;
 import processing.core.PVector;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class NeuralGas {
-    PApplet pApplet;
-    List<PVector> referenceVectors;
+    final PApplet pApplet;
+    private final Random random;
+    List<Node> referenceVectors;
     List<Edge> edges;
-    List<Node> dataNodes;
+    int inputSignals;
 
-    public NeuralGas(PApplet pApplet, List<Node> dataNodes) {
+    public NeuralGas(PApplet pApplet) {
         this.pApplet = pApplet;
-        this.dataNodes = dataNodes;
-        referenceVectors = new ArrayList<>();
-        edges = new ArrayList<>();
+        this.random = new Random();
+        this.inputSignals = 1;
+        this.referenceVectors = new ArrayList<>();
+        this.edges = new ArrayList<>();
     }
 
     public void initializeNeuralGas() {
-        PVector a = new PVector((float) Math.random() * Main.WIDTH, (float) Math.random() * Main.HEIGHT);
-        PVector b = new PVector((float) Math.random() * Main.WIDTH, (float) Math.random() * Main.HEIGHT);
-        Edge edge = new Edge(a, b, 0);
+        Node a = new Node((float) Math.random() * Main.WIDTH, (float) Math.random() * Main.HEIGHT);
+        Node b = new Node((float) Math.random() * Main.WIDTH, (float) Math.random() * Main.HEIGHT);
+        Edge edge = new Edge(a, b);
         this.edges.add(edge);
         referenceVectors.add(a);
         referenceVectors.add(b);
     }
 
-    public void determineWinners() {
-        for (Node inVec : this.dataNodes) {
-            inVec.setS1(referenceVectors.stream().min((vec1,vec2) -> inVec.getVector().dist(vec1) < inVec.getVector().dist(vec2) ? 1 : -1).get());
-            inVec.setS1Dist(inVec.getVector().dist(inVec.getS1()));
-            inVec.setS2(referenceVectors.stream().filter(vec -> vec != inVec.getS1()).min((vec1,vec2) -> inVec.getVector().dist(vec1) < inVec.getVector().dist(vec2) ? 1 : -1).get());
-            inVec.setS2Dist(inVec.getVector().dist(inVec.getS2()));
+    public void adapt(@NotNull PVector dataVector) {
+
+        Node s1 = this.referenceVectors.stream().min((v1, v2) -> v1.dist(dataVector) >= v2.dist(dataVector) ? 1 : -1).get();
+        Node s2 = this.referenceVectors.stream().filter(v -> !v.equals(s1)).min((v1, v2) -> v1.dist(dataVector) >= v2.dist(dataVector) ? 1 : -1).get();
+
+        getNodeEdges(s1).forEach(Edge::increaseAge);
+
+        float distance = s1.dist(dataVector);
+        s1.increaseError((float) Math.pow(distance, 2));
+
+        PVector s1Direction = new PVector(dataVector.x, dataVector.y).sub(s1);
+        s1.add(s1Direction.mult(Main.menu.E_B));
+
+        List<Node> s1Neighbours = getNeighbours(s1);
+
+        s1Neighbours.forEach(neighbour -> {
+            PVector dir = new PVector(dataVector.x, dataVector.y).sub(neighbour);
+            neighbour.add(dir.mult(Main.menu.E_N));
+        });
+
+        Optional<Edge> winnersEdge = getNodesEdge(s1, s2);
+        if (winnersEdge.isPresent()) {
+            winnersEdge.get().setAge(0.0f);
+        } else {
+            edges.add(new Edge(s1, s2));
         }
+
+        // Remove too old edges
+        this.edges = this.edges.stream().filter(edge -> edge.getAge() < Main.menu.A_MAX).collect(Collectors.toList());
+
+        // Remove points with no edges
+        this.referenceVectors = this.referenceVectors.stream().filter(n -> getNodeEdges(n).size() > 0).collect(Collectors.toList());
     }
 
-    public void updateEdgesAge(){
-        for (Node inVec : this.dataNodes){
-            inVec.getS1Edges().forEach(edge -> edge.age += edge.age + 1);
-            inVec.setError(inVec.error + inVec.getS1Dist() * inVec.getS1Dist());
-        }
+    public void nextIteration(List<PVector> input){
+        this.adapt(input.get(random.nextInt(input.size())));
+        this.newNodeCheck();
+
+        // Decrease all nodes error
+        this.referenceVectors.forEach(n -> n.decreaseError(n.getError() * Main.D));
+
+        this.inputSignals++;
     }
 
-    public void updateNeighbours(){
-        for (Node inVec : this.dataNodes){
-            inVec.getS1().set(new PVector(inVec.getVector().x,inVec.getVector().y).sub(inVec.getS1().x,inVec.getS1().y).mult(Main.menu.E_B));
-            inVec.getS1Neighbours().forEach(neighbour -> neighbour.set(new PVector(inVec.getVector().x,inVec.getVector().y).sub(neighbour.x,neighbour.y).mult(Main.menu.E_N)));
+    public void newNodeCheck() {
+        if (this.inputSignals % Main.menu.LAMBDA == 0) {
+            Node q = this.referenceVectors.stream().max(Comparator.comparing(Node::getError)).get();
+            Node f = this.getNeighbours(q).stream().max(Comparator.comparing(Node::getError)).get();
+            Node r = new Node((q.x + f.x) / 2, (q.y + f.y) / 2);
+
+            Edge q_r = new Edge(q, r);
+            Edge f_r = new Edge(f, r);
+            Edge oldEdge = getNodesEdge(q, f).get();
+            this.edges.remove(oldEdge);
+
+            q.decreaseError();
+            f.decreaseError();
+            r.setError(q.getError());
+
+            this.edges.add(q_r);
+            this.edges.add(f_r);
+            this.referenceVectors.add(r);
         }
-    }
-
-    public void updateEdges(){
-        for (Node inVec : this.dataNodes) {
-            Edge e = this.edges.stream().filter(edge -> (edge.pointA == inVec.s1 && edge.pointB == inVec.s2) || (edge.pointB == inVec.s1 && edge.pointA == inVec.s2)).findFirst().get();
-
-            if(e != null){
-                e.setAge(0f);
-            }else{
-                this.edges.add(new Edge(inVec.s1, inVec.s2,0f));
-            }
-
-            this.edges.stream().forEach(edge -> {
-                if (edge.getAge() > Main.menu.A_MAX){
-                    this.edges.remove(edge);
-                }
-            });
-
-
-        }
-    }
-
-    public void updateGas(){
-        determineWinners();
-        updateEdgesAge();
-        updateNeighbours();
-        updateEdges();
     }
 
     public void drawGas() {
-        referenceVectors.forEach(pVector -> {
+        this.referenceVectors.forEach(node -> {
             this.pApplet.strokeWeight(5f);
             this.pApplet.stroke(255, 0, 0);
-            this.pApplet.point(pVector.x, pVector.y);
+            this.pApplet.point(node.x, node.y);
         });
 
-        edges.forEach(edge -> {
+        this.edges.forEach(edge -> {
             this.pApplet.strokeWeight(1f);
             this.pApplet.line(edge.pointA.x, edge.pointA.y, edge.pointB.x, edge.pointB.y);
         });
     }
 
-    public List<Edge> getEdges() {
-        return edges;
+    public List<Edge> getNodeEdges(Node node) {
+        return this.edges.stream().filter(edge -> edge.getPointA() == node || edge.getPointB() == node).collect(Collectors.toList());
     }
 
-    public void setEdges(List<Edge> edges) {
-        this.edges = edges;
+    public @NotNull Optional<Edge> getNodesEdge(Node n1, Node n2) {
+        return this.edges.stream().filter(edge -> (edge.pointA == n1 && edge.pointB == n2) || edge.pointA == n2 && edge.pointB == n1).findFirst();
+    }
+
+    public List<Node> getNeighbours(Node node) {
+        List<Edge> nodeEdges = getNodeEdges(node);
+        return nodeEdges.stream().map(n -> n.getOther(node)).collect(Collectors.toList());
     }
 }
-
-
-

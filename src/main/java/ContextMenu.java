@@ -6,6 +6,7 @@ import java.util.Arrays;
 public class ContextMenu {
     UiBooster booster = new UiBooster();
     Boolean SUBMITTED = Boolean.FALSE;
+    String IMAGE_NAME;
     Float LAMBDA;
     Float E_B;
     Float E_N;
@@ -15,10 +16,14 @@ public class ContextMenu {
     public void showMenu() {
         this.form = booster
                 .createForm("Neural Gas Settings")
-                .addSlider("Set Lambda", 0, 300, 50, 20, 5).setID("LAMBDA")
-                .addSlider("Set E_B", 0, 300, 50, 20, 5).setID("E_B")
-                .addSlider("Set E_N", 0, 300, 50, 20, 5).setID("E_N")
-                .addSlider("Set A_MAX", 0, 300, 50, 20, 5).setID("A_MAX")
+                .addSelection(
+                        "Choose test picture",
+                        Main.imageFilesList
+                ).setID("image_selection")
+                .addSlider("Set Lambda", 1, 500, 300, 20, 5).setID("LAMBDA")
+                .addSlider("Set E_B (Will by divided by 100)", 0, 100, 20, 20, 1).setID("E_B")
+                .addSlider("Set E_N (Will by divided by 10000)", 0, 100, 6, 20, 1).setID("E_N")
+                .addSlider("Set A_MAX", 1, 200, 50, 20, 5).setID("A_MAX")
                 .addButton("Submit", () -> {
                             System.out.println("Close this window");
                         }
@@ -38,15 +43,16 @@ public class ContextMenu {
 
     public void submit(Form form){
         this.SUBMITTED = Boolean.TRUE;
+        this.IMAGE_NAME = form.getById("image_selection").asString();
         this.LAMBDA = form.getById("LAMBDA").asFloat();
-        this.E_B = form.getById("E_B").asFloat();
-        this.E_N = form.getById("E_N").asFloat();
+        this.E_B = form.getById("E_B").asFloat()/100;
+        this.E_N = form.getById("E_N").asFloat()/10000;
         this.A_MAX = form.getById("A_MAX").asFloat();
         // Print all results after submit
         form.getElements().forEach(e -> {
             System.out.println(e.getLabel() + " -> " + e.getValue());
         });
-        form.close();
+//        form.close();
     }
 }
 

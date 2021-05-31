@@ -21,18 +21,14 @@ public class Main extends PApplet {
     // BASIC SETTINGS
     public static final int HEIGHT = 800;
     public static final int WIDTH = 800;
-    public static final int BACKGROUND_COLOR = 51;
+    public static final int BACKGROUND_COLOR = 60;
     public static final Boolean DRAW_IMAGE = true; //Drawing input photo
     public static final Boolean DRAW_INPUT_NODES = false;
 
-    // Gas settings
-//    public static final float LAMBDA = 300;
-//    public static final float E_B = 0.2f;
-//    public static final float E_N = 0.006f;
     public static final float ALFA = 0.5f;
     public static final float D = 0.995f;
-//    public static final int A_MAX = 50;
-    public static int SPEED_UP = 200;
+    public int ITERATIONS;
+    public boolean isReallyMousePressed;
     public static List<String> imageFilesList; //This will hold image names form settings()
 
 
@@ -64,7 +60,7 @@ public class Main extends PApplet {
                 }
             }
         };
-        imageFilesList = Arrays.asList(directoryPath.list(jpgFilefilter));
+        imageFilesList = new ArrayList<String>(Arrays.asList(directoryPath.list(jpgFilefilter)));
         System.out.println("List of the jpeg files in the specified directory:");
         for(String fileName : imageFilesList) {
             System.out.println(fileName);
@@ -81,6 +77,7 @@ public class Main extends PApplet {
     }
 
     public void initialize() {
+        this.ITERATIONS = 0;
         neuralGas = new NeuralGas(this);
         neuralGas.initializeNeuralGas();
         inputImage = loadImage(menu.IMAGE_NAME);
@@ -90,18 +87,18 @@ public class Main extends PApplet {
     }
 
     public void draw() {
+        drawBackground(); //background has to be drawn each iteration
+        neuralGasNextStep();
+        handleMouse();
+    }
+
+    public void drawBackground(){
+        //Based on DRAW_IMAGE variable either Image or background (black) i being drawn
+        //If DRAW_INPUT_NODES == true calculated input nodes are being drawn
         if (DRAW_IMAGE)
             image(inputImage, 0, 0);
         else
             background(BACKGROUND_COLOR);
-
-        if (this.dataNodes.size() > 0) {
-            for (int i = 0; i < SPEED_UP; i++) {
-                this.neuralGas.nextIteration(this.dataNodes);
-            }
-        }
-
-        this.neuralGas.drawGas();
 
         if (DRAW_INPUT_NODES)
             this.dataNodes.forEach(node -> {
@@ -109,8 +106,19 @@ public class Main extends PApplet {
                 strokeWeight(3f);
                 point(node.x, node.y);
             });
+    }
 
-        handleMouse();
+
+    public void neuralGasNextStep(){
+        //SPEED_UP variable determines how many nodes calculations are skipped before drawing them.
+        if (this.dataNodes.size() > 0){
+            for (int i = 0; (i < menu.SPEED_UP) && (this.ITERATIONS <= menu.MAX_ITERATIONS); i++) {
+                this.ITERATIONS = this.ITERATIONS + 1;
+                this.neuralGas.nextIteration(this.dataNodes);
+            }
+        }
+        System.out.println(this.ITERATIONS);
+        this.neuralGas.drawGas();
     }
 
     public List<PVector> initializeData(PImage image) {
@@ -121,7 +129,7 @@ public class Main extends PApplet {
                 for (int x = 0; x < image.width; x++) {
                     int pos = y * image.width + x;
                     float val = brightness(image.pixels[pos]);
-                    if (val > 240.0f) { //Color treshold. If >240 looks for blacks, if ==0 gets only white
+                    if (val > 240.0f) { //Color threshold. If >240 looks for blacks, if ==0 gets only white
                         list.add(new PVector(x, y));
                     }
                 }
@@ -131,12 +139,15 @@ public class Main extends PApplet {
     }
 
     public void handleMouse(){
+
         if(mousePressed && mouseButton == RIGHT) {
             menu.showMenu();
             if (menu.SUBMITTED == Boolean.TRUE){
                 initialize();
                 menu.SUBMITTED = Boolean.FALSE;
             }
+            mousePressed = false;
+            mouseButton = 0;
         }
     }
 

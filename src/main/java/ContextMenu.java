@@ -59,6 +59,7 @@ public class ContextMenu {
                 })
                 .andWindow()
                 .setSize(500, 1000)
+                .setPosition(1000,10)
                 .setUndecorated()
                 .save()
                 .show();
